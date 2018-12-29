@@ -11,16 +11,33 @@ from django.shortcuts import render
 from .forms import CommandForm
 
 
-def command_list(request):
+COMMAND_BLACKLIST = (
+    ('shell', 'django.core'),
+    ('dbshell', 'django.core'),
+    ('runserver', 'django.core'),
+    ('testserver', 'django.core'),
+)
+
+
+def get_filtered_commands():
     commands = get_commands()
+    for filter_command, filter_module in COMMAND_BLACKLIST:
+        if filter_command in commands and commands[filter_command] == filter_module:
+            del commands[filter_command]
+    return commands
+
+
+def command_list(request):
+    commands = get_filtered_commands()
     commands_list = [ {'command': key, 'module': value} for key, value in commands.items()]
 
     return render(request, 'command_list.html', {
         'commands': commands_list,
     })
 
+
 def command_run(request, name):
-    commands = get_commands()
+    commands = get_filtered_commands()
     if not name in commands:
         raise Http404(name)
 
