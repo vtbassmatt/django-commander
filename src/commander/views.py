@@ -1,5 +1,6 @@
 from io import StringIO
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management import (
     get_commands,
     load_command_class,
@@ -49,10 +50,14 @@ def command_run(request, name):
         'command_usage': parser.format_help(),
     }
 
+    has_noinput = True if '--noinput' in response_context['command_usage'] else False
+
     if request.method == 'POST':
         form = CommandForm(request.POST)
         if form.is_valid():
             args = form.cleaned_data['args'].split()
+            if has_noinput and form.cleaned_data['automatic_noinput']:
+                args.append('--noinput')
             stdout = StringIO()
             try:
                 ret_val = call_command(cmd, stdout=stdout, stderr=stdout, *args)
@@ -61,8 +66,11 @@ def command_run(request, name):
                     "-------",
                     stdout.getvalue(),
                 ])
-            except CommandError as exc:
-                response_context['command_results'] = str(exc)
+            except (CommandError, ImproperlyConfigured) as exc:
+                response_context['command_results'] = "\n".join([
+                    'Exception: ' + exc.__class__.__name__,
+                    str(exc),
+                ])
             except SystemExit:
                 pass
             stdout.close()
