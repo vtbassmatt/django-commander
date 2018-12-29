@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from commander import views as cmdr
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('manage/', cmdr.commands_list, name='manage'),
 ]
