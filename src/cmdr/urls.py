@@ -20,5 +20,6 @@ from commander import views as cmdr
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('manage/', cmdr.commands_list, name='manage'),
+    path('manage/', cmdr.command_list, name='command-list'),
+    path('manage/<str:name>/', cmdr.command_run, name='command-run'),
 ]

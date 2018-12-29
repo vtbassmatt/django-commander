@@ -2,6 +2,6 @@
 {% for module, module_commands in commands_by_module %}
 <h1>{{ module }}</h1>
 {% for command in module_commands %}
-<div>{{ command.command }}</div>
+<div><a href="{% url 'command-run' command.command %}">{{ command.command }}</a></div>
 {% endfor %}
 {% endfor %}
