@@ -1,14 +1,7 @@
-from io import StringIO
-
-from django.core.exceptions import ImproperlyConfigured
-from django.core.management import (
-    load_command_class,
-    call_command,
-    CommandError)
-from django.http import HttpResponse, Http404
+from django.http import Http404
 from django.shortcuts import render
 
-from .commands import get_filtered_commands
+from .commands import get_filtered_commands, WebRunnableCommand
 from .forms import CommandForm
 from .protection import protect_with_key
 
@@ -30,39 +23,21 @@ def command_run(request, name):
     if not name in commands:
         raise Http404(name)
 
-    cmd = load_command_class(commands[name], name)
-    parser = cmd.create_parser('manage.py', name)
+    runnable = WebRunnableCommand(commands[name], name)
 
     response_context = {
-        'command_name': name,
-        'command_usage': parser.format_help(),
+        'command_name': runnable.name,
+        'command_usage': runnable.usage,
         'key': request.GET['key'],
     }
-
-    has_noinput = True if '--noinput' in response_context['command_usage'] else False
 
     if request.method == 'POST':
         form = CommandForm(request.POST)
         if form.is_valid():
-            args = form.cleaned_data['args'].split()
-            if has_noinput and form.cleaned_data['automatic_noinput']:
-                args.append('--noinput')
-            stdout = StringIO()
-            try:
-                ret_val = call_command(cmd, stdout=stdout, stderr=stdout, *args)
-                response_context['command_results'] = "\n".join([
-                    f"Return value: {ret_val or None}",
-                    "-------",
-                    stdout.getvalue(),
-                ])
-            except (CommandError, ImproperlyConfigured) as exc:
-                response_context['command_results'] = "\n".join([
-                    'Exception: ' + exc.__class__.__name__,
-                    str(exc),
-                ])
-            except SystemExit:
-                pass
-            stdout.close()
+            args = form.cleaned_data['args']
+            auto_noinput = form.cleaned_data['automatic_noinput']
+            response_context['command_results'] = runnable.run(args, auto_noinput)
+
     else:
         form = CommandForm()
 
