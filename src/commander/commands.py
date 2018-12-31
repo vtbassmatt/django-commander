@@ -1,3 +1,4 @@
+from functools import lru_cache
 from io import StringIO
 
 from django.core.management import (
@@ -40,6 +41,7 @@ class WebRunnableCommand:
         return self._name
 
     @property
+    @lru_cache(maxsize=4)
     def usage(self):
         return self._parser.format_help()
 
