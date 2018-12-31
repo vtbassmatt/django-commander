@@ -1,6 +1,8 @@
 # Django Commander
 
 Run Django `manage.py` commands from the web.
+This is mainly useful in situations where you can't easily SSH into your host.
+For example, if you use [azf-wsgi](https://github.com/vtbassmatt/azf-wsgi) to run Django on Azure Functions.
 
 ## Configuration
 
