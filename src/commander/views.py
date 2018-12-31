@@ -2,31 +2,15 @@ from io import StringIO
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import (
-    get_commands,
     load_command_class,
     call_command,
     CommandError)
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
 
+from .commands import get_filtered_commands
 from .forms import CommandForm
 from .protection import protect_with_key
-
-
-COMMAND_BLACKLIST = (
-    ('shell', 'django.core'),
-    ('dbshell', 'django.core'),
-    ('runserver', 'django.contrib.staticfiles'),
-    ('testserver', 'django.core'),
-)
-
-
-def get_filtered_commands():
-    commands = get_commands()
-    for filter_command, filter_module in COMMAND_BLACKLIST:
-        if filter_command in commands and commands[filter_command] == filter_module:
-            del commands[filter_command]
-    return commands
 
 
 @protect_with_key
