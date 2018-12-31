@@ -10,6 +10,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render
 
 from .forms import CommandForm
+from .protection import protect_with_key
 
 
 COMMAND_BLACKLIST = (
@@ -28,15 +29,18 @@ def get_filtered_commands():
     return commands
 
 
+@protect_with_key
 def command_list(request):
     commands = get_filtered_commands()
     commands_list = [ {'command': key, 'module': value} for key, value in commands.items()]
 
     return render(request, 'command_list.html', {
         'commands': commands_list,
+        'key': request.GET['key'],
     })
 
 
+@protect_with_key
 def command_run(request, name):
     commands = get_filtered_commands()
     if not name in commands:
@@ -48,6 +52,7 @@ def command_run(request, name):
     response_context = {
         'command_name': name,
         'command_usage': parser.format_help(),
+        'key': request.GET['key'],
     }
 
     has_noinput = True if '--noinput' in response_context['command_usage'] else False
