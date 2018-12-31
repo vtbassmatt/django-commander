@@ -10,3 +10,12 @@ Run Django `manage.py` commands from the web.
 4. Navigate to `http://yourserver/yourapp/commander/?key={COMMANDER_KEY}`.
 5. Do whatever config you need to do.
 6. Change `COMMANDER_KEY` explicitly to `None` to disable management 😌
+
+## Contributing
+
+Contributions welcome. Be kind to one another.
+
+To develop locally, first make a virtualenv.
+Then cd into `dev/` and `pip install -e ../src`.
+Then `pip install django` and off you go.
+
