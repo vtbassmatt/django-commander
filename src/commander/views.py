@@ -16,7 +16,7 @@ from .protection import protect_with_key
 COMMAND_BLACKLIST = (
     ('shell', 'django.core'),
     ('dbshell', 'django.core'),
-    ('runserver', 'django.core'),
+    ('runserver', 'django.contrib.staticfiles'),
     ('testserver', 'django.core'),
 )
 
